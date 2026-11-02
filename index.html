@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>總務處-事務組 工作平台 ｜ 上海台商子女學校</title>
+<style>
+  :root{
+    --bg:#F5F1EA;
+    --sidebar:#EDE6DA;
+    --card:#FFFFFF;
+    --orange:#E8833A;
+    --orange-soft:#FBE9DC;
+    --purple:#EDE7F6;
+    --purple-deep:#7E57C2;
+    --text:#3A3530;
+    --muted:#8A8178;
+    --border:#ECE6DC;
+    --red:#E57373;
+    --amber:#FFB74D;
+    --green:#81C784;
+    --shadow:0 2px 10px rgba(80,60,30,.06);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:"Noto Sans TC","Microsoft JhengHei","PingFang TC","標楷體",sans-serif;
+    background:var(--bg);color:var(--text);line-height:1.6;
+  }
+  .app{display:flex;min-height:100vh}
+
+  /* 側邊欄 */
+  .sidebar{
+    width:240px;flex-shrink:0;background:var(--sidebar);
+    display:flex;flex-direction:column;padding:22px 16px;
+    border-right:1px solid var(--border);
+  }
+  .brand{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .brand img{width:52px;height:52px;object-fit:contain}
+  .brand-text b{display:block;font-size:17px;color:var(--text)}
+  .brand-text span{font-size:11px;color:var(--muted)}
+  .nav{margin-top:26px;display:flex;flex-direction:column;gap:6px}
+  .nav-item{
+    text-align:left;background:transparent;border:none;cursor:pointer;
+    padding:12px 14px;border-radius:10px;font-size:15px;color:var(--text);
+    display:flex;align-items:center;gap:10px;transition:.15s;font-family:inherit;
+  }
+  .nav-item .dot{width:9px;height:9px;border-radius:50%;background:var(--muted);flex-shrink:0}
+  .nav-item:hover{background:rgba(0,0,0,.04)}
+  .nav-item.active{background:var(--purple);color:var(--purple-deep);font-weight:600}
+  .nav-item.active .dot{background:var(--purple-deep)}
+  .sidebar-foot{margin-top:auto;text-align:center;color:var(--muted);font-size:11px}
+  .sidebar-foot img{width:80px;opacity:.92;margin-bottom:4px}
+
+  /* 主內容 */
+  .main{flex:1;padding:26px 34px;max-width:1100px}
+  .topbar{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:22px;flex-wrap:wrap;gap:12px}
+  .topbar h1{font-size:24px;font-weight:700}
+  .topbar .date{color:var(--muted);font-size:14px;margin-top:4px}
+  .topbar .welcome{display:flex;align-items:center;gap:10px}
+  .topbar .welcome img{width:64px;height:64px;object-fit:contain}
+  .topbar .welcome span{font-size:13px;color:var(--muted)}
+
+  .stats{display:flex;gap:14px;margin-bottom:22px;flex-wrap:wrap}
+  .stat-card{
+    background:var(--card);border:1px solid var(--border);border-radius:14px;
+    padding:14px 18px;min-width:150px;box-shadow:var(--shadow);
+  }
+  .stat-card .n{font-size:26px;font-weight:700;color:var(--orange)}
+  .stat-card .l{font-size:13px;color:var(--muted)}
+
+  .module{display:none}
+  .module.active{display:block;animation:fade .25s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .module h2{font-size:20px;margin-bottom:4px}
+  .module .sub{color:var(--muted);font-size:13px;margin-bottom:18px}
+
+  /* 卡片 */
+  .card{background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:18px}
+  .btn{
+    background:var(--orange);color:#fff;border:none;border-radius:9px;
+    padding:9px 16px;font-size:14px;cursor:pointer;font-family:inherit;transition:.15s;
+  }
+  .btn:hover{filter:brightness(1.05)}
+  .btn.ghost{background:var(--orange-soft);color:var(--orange)}
+  .btn.sm{padding:5px 11px;font-size:12.5px;border-radius:7px}
+  .btn.purple{background:var(--purple);color:var(--purple-deep)}
+  input[type=text],input[type=date],input[type=datetime-local],textarea,select{
+    width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;
+    font-size:14px;font-family:inherit;background:#fff;color:var(--text);
+  }
+  textarea{resize:vertical;min-height:38px}
+  label{font-size:13px;color:var(--muted);display:block;margin-bottom:4px}
+
+  /* 手風琴 */
+  .acc{border:1px solid var(--border);border-radius:14px;background:var(--card);box-shadow:var(--shadow);overflow:hidden;margin-bottom:12px}
+  .acc-head{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;cursor:pointer;user-select:none}
+  .acc-head:hover{background:#FAF7F1}
+  .acc-head .left{display:flex;align-items:center;gap:12px}
+  .acc-head .name{font-size:16px;font-weight:600}
+  .acc-head .badge{background:var(--orange);color:#fff;font-size:12px;border-radius:20px;min-width:22px;height:22px;padding:0 7px;display:inline-flex;align-items:center;justify-content:center;font-weight:600}
+  .acc-head .chev{color:var(--muted);transition:.2s;font-size:13px}
+  .acc.open .acc-head .chev{transform:rotate(90deg)}
+  .acc-body{display:none;padding:0 18px 18px}
+  .acc.open .acc-body{display:block}
+
+  .task{border:1px solid var(--border);border-radius:10px;padding:11px 13px;margin-bottom:9px;background:#FCFAF6}
+  .task .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+  .task .content{font-weight:600;font-size:14.5px}
+  .task .meta{font-size:12.5px;color:var(--muted);margin-top:3px}
+  .tag{font-size:11.5px;padding:2px 9px;border-radius:20px;font-weight:600;white-space:nowrap}
+  .tag.未完成{background:#FBE3E3;color:#B23B3B}
+  .tag.進行中{background:#FFEFD6;color:#C77700}
+  .tag.已完成{background:#E4F4E6;color:#2E7D32}
+  .task .ops{display:flex;gap:6px;flex-shrink:0}
+  .icon-btn{background:none;border:1px solid var(--border);border-radius:7px;padding:4px 9px;font-size:12px;cursor:pointer;color:var(--muted);font-family:inherit}
+  .icon-btn:hover{border-color:var(--orange);color:var(--orange)}
+
+  .form-row{display:grid;gap:10px;margin-top:6px}
+  .form-2{grid-template-columns:1fr 1fr}
+  .add-form{border-top:1px dashed var(--border);margin-top:12px;padding-top:12px;display:none}
+  .add-form.show{display:block}
+
+  /* 模組二 */
+  .group-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:760px){.group-grid{grid-template-columns:1fr}.stats .stat-card{min-width:120px}}
+  .group-card h3{font-size:16px;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+  .group-card h3 .gdot{width:10px;height:10px;border-radius:50%}
+  .sub-col{margin-bottom:12px}
+  .sub-col .t{font-size:13px;font-weight:600;color:var(--purple-deep);margin-bottom:6px;display:flex;justify-content:space-between;align-items:center}
+  .rep-item{display:flex;align-items:center;gap:8px;background:#FCFAF6;border:1px solid var(--border);border-radius:8px;padding:7px 10px;margin-bottom:6px;font-size:13.5px}
+  .rep-item .txt{flex:1;white-space:pre-wrap;word-break:break-word}
+  .rep-item .ops{display:flex;gap:6px;flex-shrink:0}
+  .rep-item.editing{display:block;padding:8px 10px}
+  .rep-item.editing .rep-edit{width:100%;min-height:64px;margin-bottom:8px;font-size:13.5px}
+  .rep-item.editing .ops{justify-content:flex-end}
+  .rep-input{display:flex;gap:8px;margin-top:4px}
+  .rep-input input,.rep-input textarea{flex:1}
+  .report-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:760px){.report-grid{grid-template-columns:1fr}}
+  .rep-col{background:#fff;border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow);padding:18px}
+  .rep-col .t{font-size:15px;font-weight:700;color:var(--purple-deep);margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid var(--orange);display:flex;justify-content:space-between;align-items:center}
+
+  /* 模組三月曆 */
+  .meet-wrap{display:grid;grid-template-columns:1.3fr 1fr;gap:18px}
+  @media(max-width:860px){.meet-wrap{grid-template-columns:1fr}}
+  .cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .cal-head .m{font-size:16px;font-weight:600}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+  .cal-grid .wd{text-align:center;font-size:12px;color:var(--muted);padding:4px 0}
+  .cal-cell{aspect-ratio:1/1;border:1px solid var(--border);border-radius:8px;padding:5px;font-size:13px;cursor:pointer;position:relative;background:#fff;transition:.12s;overflow:hidden}
+  .cal-cell:hover{border-color:var(--orange)}
+  .cal-cell.muted{background:#FBF8F2;color:#C9C0B4;cursor:default}
+  .cal-cell.today{border-color:var(--orange);box-shadow:0 0 0 2px var(--orange-soft)}
+  .cal-cell.has{font-weight:600}
+  .cal-cell .cnt{position:absolute;bottom:3px;right:5px;font-size:10px;background:var(--orange);color:#fff;border-radius:10px;padding:0 5px;line-height:15px}
+  .meet-list{margin-top:14px}
+  .meet-item{border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px;background:#FCFAF6;display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+  .meet-item .mt{font-weight:600}
+  .meet-item .mm{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .empty{color:var(--muted);font-size:13px;text-align:center;padding:18px 0}
+
+  /* 匯出對話框 */
+  .modal-mask{position:fixed;inset:0;background:rgba(40,30,15,.45);display:flex;align-items:center;justify-content:center;z-index:999;padding:20px}
+  .modal{background:#fff;border-radius:16px;max-width:700px;width:100%;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(0,0,0,.22)}
+  .modal header{padding:15px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+  .modal header b{font-size:17px}
+  .modal .body{padding:0;flex:1;overflow:auto;background:#FAF7F1}
+  .modal iframe{border:none;width:100%;height:46vh;background:#fff}
+  .modal .exmsg{padding:10px 20px 0;color:var(--muted);font-size:12.5px;line-height:1.5}
+  .modal .foot{padding:12px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- 側邊欄 -->
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="bear1.jpg" alt="吉祥物">
+      <div class="brand-text"><b>總務處-事務組 工作平台</b><span>上海台商子女學校</span></div>
+    </div>
+    <nav class="nav">
+      <button class="nav-item active" data-mod="tasks"><span class="dot"></span>主任交辦事項</button>
+      <button class="nav-item" data-mod="reports"><span class="dot"></span>事務組工作報告</button>
+      <button class="nav-item" data-mod="meetings"><span class="dot"></span>會議管理</button>
+    </nav>
+    <div class="sidebar-foot">
+      <img src="bear2.jpg" alt="吉祥物2"><br>總務處 溫馨提醒您
+    </div>
+  </aside>
+
+  <!-- 主內容 -->
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1>總務處-事務組 工作平台</h1>
+        <div class="date" id="todayStr"></div>
+      </div>
+      <div class="welcome">
+        <span id="welcomeText">事務小曾 早安</span>
+        <img src="bear1.jpg" alt="吉祥物">
+      </div>
+    </div>
+
+    <!-- 模組一 -->
+    <section class="module active" id="mod-tasks">
+      <h2>主任交辦事項</h2>
+      <div class="sub">點擊各分類標題可展開／收合，於分類內新增、編輯、刪除交辦事項。</div>
+      <div class="stats" id="taskStats"></div>
+      <div id="accContainer"></div>
+    </section>
+
+    <!-- 模組二 -->
+    <section class="module" id="mod-reports">
+      <h2>事務組工作報告</h2>
+      <div class="sub">請條列填寫事務組的「已完成事項」與「即將進行事項」，週末可彙整輸出 Word 檔。</div>
+      <div style="margin-bottom:14px">
+        <button class="btn" id="exportWord">彙整輸出 Word 檔</button>
+      </div>
+      <div class="report-grid" id="reportBoard"></div>
+    </section>
+
+    <!-- 模組三 -->
+    <section class="module" id="mod-meetings">
+      <h2>會議管理</h2>
+      <div class="sub">點選月曆日期即可帶入會議時間，於右方登錄會議資料；下方列表依時間排序。</div>
+      <div class="meet-wrap">
+        <div class="card">
+          <div class="cal-head">
+            <button class="icon-btn" id="prevM">‹ 上個月</button>
+            <span class="m" id="calMonth"></span>
+            <span>
+              <button class="icon-btn" id="todayM">今天</button>
+              <button class="icon-btn" id="nextM">下個月 ›</button>
+            </span>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
+          <div class="meet-list" id="meetList"></div>
+        </div>
+        <div class="card">
+          <h3 style="font-size:16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:8px">登錄會議 <button class="btn sm" id="openWc">從微信貼文匯入</button></h3>
+          <div class="form-row">
+            <div><label>姓名</label><input type="text" id="mName" placeholder="會議登錄人"></div>
+            <div><label>時間</label><input type="datetime-local" id="mTime"></div>
+            <div><label>會議主題</label><input type="text" id="mTopic" placeholder="例：總務處週報會議"></div>
+            <div><label>地點</label><input type="text" id="mPlace" placeholder="例：行政會議室"></div>
+            <div><label>備註（選填）</label><textarea id="mNote" placeholder="補充說明"></textarea></div>
+          </div>
+          <div style="margin-top:12px;display:flex;gap:8px">
+            <button class="btn" id="mAdd">新增會議</button>
+            <button class="btn ghost" id="mClear">清除表單</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="supabase.min.js"></script>
+
+<script>
+/* ============ 共用：儲存 ============ */
+const LS={tasks:'zongwu_tasks',reports:'zongwu_reports',meetings:'zongwu_meetings'};
+/* 儲存層：優先用 localStorage；若環境禁止（如預覽沙箱）則自動改用本次連線的記憶體兜底，
+   確保增刪改在任意環境都能即時反應（記憶體模式重新整理會清空）。 */
+const store=(()=>{try{const t='__wb_probe__';localStorage.setItem(t,t);localStorage.removeItem(t);return localStorage;}catch(e){const m={};return{getItem:k=>(k in m?m[k]:null),setItem:(k,v)=>{m[k]=String(v)},removeItem:k=>{delete m[k]}};}})();
+const load=k=>{try{return JSON.parse(store.getItem(k))||[]}catch(e){return[]}};
+const save=(k,v)=>{try{store.setItem(k,JSON.stringify(v));}catch(e){}
+  if(cloudOn&&_sb)cloudSet(k,v);};
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const pad=n=>String(n).padStart(2,'0');
+const esc=s=>(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ============ 雲端同步（Supabase） ============ */
+const SUPABASE_URL='https://gzizktclpsqespnpjbfi.supabase.co';
+const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd6aXprdGNscHNxZXNwbnBqYmZpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM1OTY2MDEsImV4cCI6MjEwOTE3MjYwMX0.VzIxD8YXIhFdUzqxTlvLyds7d8C-MqcP1QjDEuacqRI';
+const cloudOn=!!(SUPABASE_URL&&SUPABASE_ANON_KEY&&window.supabase);
+let _sb=null;
+if(cloudOn){try{_sb=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);}catch(e){_sb=null;}}
+async function cloudGet(key){
+  if(!_sb)return null;
+  try{const {data,error}=await _sb.from('app_data').select('value').eq('key',key).maybeSingle();
+    if(error){console.warn('cloudGet',key,error.message);return null;}
+    return data?data.value:null;}catch(e){return null;}
+}
+async function cloudSet(key,val){
+  if(!_sb)return;
+  try{const {error}=await _sb.from('app_data').upsert({key,value:val},{onConflict:'key'});
+    if(error)console.warn('cloudSet',key,error.message);}catch(e){}
+}
+
+/* 今日 */
+const now=new Date();
+function greeting(d){const h=d.getHours();return (h>=5&&h<12)?'早安':(h>=12&&h<18)?'午安':'晚安';}
+function updateClock(){
+  const n=new Date();
+  const w='日一二三四五六'[n.getDay()];
+  document.getElementById('todayStr').textContent=
+    `${n.getFullYear()}年${pad(n.getMonth()+1)}月${pad(n.getDate())}日 星期${w} ${pad(n.getHours())}:${pad(n.getMinutes())}:${pad(n.getSeconds())}`;
+  const wt=document.getElementById('welcomeText');
+  if(wt)wt.textContent='事務小曾 '+greeting(n);
+}
+updateClock();
+setInterval(updateClock,1000);
+
+/* 切換模組 */
+document.querySelectorAll('.nav-item').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.module').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    document.getElementById('mod-'+b.dataset.mod).classList.add('active');
+  };
+});
+
+/* ============ 模組一：主任交辦事項 ============ */
+const CATS=['共通事項','事務組'];
+let tasks=[];
+let editingId=null;
+const STAT=['未完成','進行中','已完成'];
+
+function pendingCount(cat){return tasks.filter(t=>t.cat===cat&&t.status!=='已完成').length;}
+function totalPending(){return tasks.filter(t=>t.status!=='已完成').length;}
+
+function renderTaskStats(){
+  const el=document.getElementById('taskStats');
+  const byCat=CATS.map(c=>`${c} ${pendingCount(c)}`).join(' ・ ');
+  el.innerHTML=`
+    <div class="stat-card"><div class="n">${tasks.length}</div><div class="l">交辦總數</div></div>
+    <div class="stat-card"><div class="n">${totalPending()}</div><div class="l">未完成數</div></div>
+    <div class="stat-card" style="min-width:auto;flex:1"><div class="l">各分類待辦：${byCat}</div></div>`;
+}
+
+function renderAcc(){
+  const box=document.getElementById('accContainer');
+  box.innerHTML='';
+  CATS.forEach((cat,ci)=>{
+    const open=ci===0?' open':'';
+    const items=tasks.filter(t=>t.cat===cat);
+    const acc=document.createElement('div');
+    acc.className='acc'+open;
+    acc.innerHTML=`
+      <div class="acc-head" data-cat="${cat}">
+        <div class="left">
+          <span class="name">${cat}</span>
+          <span class="badge">${pendingCount(cat)}</span>
+        </div>
+        <span class="chev">▶</span>
+      </div>
+      <div class="acc-body">
+        <div class="task-list">${items.map(taskRow).join('')||'<div class=\"empty\">尚無交辦事項</div>'}</div>
+        <button class="btn sm" style="margin-top:10px" onclick="toggleForm('${cat}')">＋ 新增交辦事項</button>
+        <div class="add-form" id="form-${cat}">
+          <div class="form-row form-2">
+            <div><label>內容</label><textarea id="c-${cat}" placeholder="交辦內容"></textarea></div>
+            <div><label>負責人</label><input type="text" id="o-${cat}" placeholder="負責人"></div>
+            <div><label>期限</label><input type="date" id="d-${cat}"></div>
+            <div><label>狀態</label>
+              <select id="s-${cat}">${STAT.map(s=>`<option>${s}</option>`).join('')}</select>
+            </div>
+          </div>
+          <div style="margin-top:8px;display:flex;gap:8px">
+            <button class="btn sm" onclick="submitTask('${cat}')">儲存</button>
+            <button class="btn ghost sm" onclick="toggleForm('${cat}')">取消</button>
+          </div>
+        </div>
+      </div>`;
+    acc.querySelector('.acc-head').onclick=()=>acc.classList.toggle('open');
+    box.appendChild(acc);
+  });
+  bindTaskOps();
+  renderTaskStats();
+}
+
+function taskRow(t){
+  return `<div class="task" data-id="${t.id}">
+    <div class="top">
+      <div>
+        <div class="content">${esc(t.content)}</div>
+        <div class="meta">負責人：${esc(t.owner||'—')} ｜ 期限：${esc(t.due||'—')}</div>
+      </div>
+      <span class="tag ${t.status}">${t.status}</span>
+    </div>
+    <div class="ops">
+      <button class="icon-btn" data-act="edit">編輯</button>
+      <button class="icon-btn" data-act="del">刪除</button>
+    </div>
+  </div>`;
+}
+
+function bindTaskOps(){
+  document.querySelectorAll('#accContainer .task').forEach(row=>{
+    const id=row.dataset.id;
+    row.querySelector('[data-act=edit]').onclick=()=>editTask(id);
+    row.querySelector('[data-act=del]').onclick=()=>{
+      if(confirm('確定刪除此交辦事項？')){tasks=tasks.filter(t=>t.id!==id);save(LS.tasks,tasks);renderAcc();}
+    };
+  });
+}
+
+function toggleForm(cat){
+  const f=document.getElementById('form-'+cat);
+  const willHide=f.classList.contains('show');
+  f.classList.toggle('show');
+  if(willHide){ // 收合＝取消編輯
+    editingId=null;
+    ['c','o','d','s'].forEach(p=>{const el=document.getElementById(p+'-'+cat);if(el)el.value='';});
+    if(document.getElementById('s-'+cat))document.getElementById('s-'+cat).selectedIndex=0;
+  }
+}
+function submitTask(cat){
+  const c=document.getElementById('c-'+cat).value.trim();
+  if(!c){alert('請填寫交辦內容');return;}
+  const data={cat,content:c,
+    owner:document.getElementById('o-'+cat).value.trim(),
+    due:document.getElementById('d-'+cat).value,
+    status:document.getElementById('s-'+cat).value};
+  if(editingId){
+    const t=tasks.find(x=>x.id===editingId);
+    if(t)Object.assign(t,data);
+    editingId=null;
+  }else{
+    tasks.push({id:uid(),...data});
+  }
+  save(LS.tasks,tasks);renderAcc();
+}
+function editTask(id){
+  const t=tasks.find(x=>x.id===id);if(!t)return;
+  editingId=id;
+  const cat=t.cat;
+  const acc=[...document.querySelectorAll('.acc')].find(a=>a.querySelector('.acc-head').dataset.cat===cat);
+  if(acc)acc.classList.add('open');
+  const f=document.getElementById('form-'+cat);if(f)f.classList.add('show');
+  document.getElementById('c-'+cat).value=t.content;
+  document.getElementById('o-'+cat).value=t.owner||'';
+  document.getElementById('d-'+cat).value=t.due||'';
+  document.getElementById('s-'+cat).value=t.status;
+  document.getElementById('c-'+cat).focus();
+}
+
+/* ============ 模組二：各處室工作報告 ============ */
+let rep={done:[],upcoming:[]};
+let repEditing=null;
+
+function renderReport(){
+  const board=document.getElementById('reportBoard');
+  const col=(title,kind,items)=>`
+    <div class="rep-col">
+      <div class="t">${title} <span style="color:var(--muted);font-weight:400">${items.length} 項</span></div>
+      ${items.map((t,i)=>repItem(kind,i,t)).join('')||'<div class="empty">尚無資料</div>'}
+      <div class="rep-input"><textarea id="ri-${kind}" rows="2" placeholder="新增${title}（可換行，Ctrl+Enter 送出）…" onkeydown="if(event.key==='Enter'&&(event.ctrlKey||event.metaKey)){event.preventDefault();addRep('${kind}');}"></textarea><button class="btn sm" onclick="addRep('${kind}')">＋</button></div>
+    </div>`;
+  board.innerHTML=col('已完成事項','done',rep.done)+col('即將進行事項','upcoming',rep.upcoming);
+  bindRepOps();
+}
+function repItem(kind,i,t){
+  if(repEditing&&repEditing.kind===kind&&repEditing.i===i){
+    return `<div class="rep-item editing" data-kind="${kind}" data-i="${i}">
+      <textarea class="rep-edit" id="re-${kind}-${i}">${esc(t)}</textarea>
+      <span class="ops"><button class="btn sm" data-act="save">儲存</button><button class="btn ghost sm" data-act="cancel">取消</button></span>
+    </div>`;
+  }
+  return `<div class="rep-item" data-kind="${kind}" data-i="${i}">
+    <span class="txt">${esc(t)}</span>
+    <span class="ops"><button class="icon-btn" data-act="edit">編輯</button><button class="icon-btn" data-act="del">✕</button></span>
+  </div>`;
+}
+function bindRepOps(){
+  document.querySelectorAll('#reportBoard .rep-item').forEach(it=>{
+    const kind=it.dataset.kind, i=+it.dataset.i;
+    const editBtn=it.querySelector('[data-act=edit]');
+    const delBtn=it.querySelector('[data-act=del]');
+    const saveBtn=it.querySelector('[data-act=save]');
+    const cancelBtn=it.querySelector('[data-act=cancel]');
+    if(editBtn)editBtn.onclick=()=>{repEditing={kind,i};renderReport();setTimeout(()=>{const ta=document.getElementById('re-'+kind+'-'+i);if(ta)ta.focus();},0);};
+    if(delBtn)delBtn.onclick=()=>{rep[kind].splice(i,1);save(LS.reports,rep);renderReport();};
+    if(saveBtn)saveBtn.onclick=()=>{const ta=document.getElementById('re-'+kind+'-'+i);if(!ta)return;rep[kind][i]=ta.value;save(LS.reports,rep);repEditing=null;renderReport();};
+    if(cancelBtn)cancelBtn.onclick=()=>{repEditing=null;renderReport();};
+  });
+}
+function addRep(kind){
+  const inp=document.getElementById('ri-'+kind);
+  const v=inp.value.trim();if(!v)return;
+  rep[kind].push(v);save(LS.reports,rep);renderReport();
+}
+
+/* Word 匯出 */
+function exportWord(){
+  const d=new Date();
+  const week=`${d.getFullYear()}年第${Math.ceil((d.getDate()+(new Date(d.getFullYear(),d.getMonth(),1).getDay()))/7)}週`;
+  const li=arr=>arr.length?arr.map(t=>`<li>${esc(t).replace(/\n/g,'<br>')}</li>`).join(''):'<li>（無）</li>';
+  const html=`<html xmlns:o='urn:schemas-microsoft-com:office:office'>
+<head><meta charset='utf-8'><title>事務組工作報告</title></head>
+<body style="font-family:標楷體,DFKai-SB,serif">
+<h1>事務組 工作報告（${week}）</h1>
+<p>匯整日期：${d.getFullYear()}/${pad(d.getMonth()+1)}/${pad(d.getDate())}</p>
+<h2 style="font-size:15pt;font-weight:bold;color:#7E57C2;border-bottom:2px solid #E8833A;padding-bottom:4px;margin-top:18px">一、已完成事項</h2>
+<ul>${li(rep.done)}</ul>
+<h2 style="font-size:15pt;font-weight:bold;color:#7E57C2;border-bottom:2px solid #E8833A;padding-bottom:4px;margin-top:18px">二、即將進行事項</h2>
+<ul>${li(rep.upcoming)}</ul>
+</body></html>`;
+  const filename=`事務組工作報告_${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}.doc`;
+  const blob=new Blob(['\ufeff'+html],{type:'application/msword;charset=utf-8'});
+  const url=URL.createObjectURL(blob);
+  let w=null;
+  try{w=window.open(url,'_blank');}catch(e){}
+  if(!w){
+    const a=document.createElement('a');
+    a.href=url;a.download=filename;document.body.appendChild(a);
+    try{a.click();}catch(e){}
+    document.body.removeChild(a);
+    showExportModal(html,filename,url);
+  }
+}
+function showExportModal(html,filename,url){
+  const mask=document.createElement('div');mask.className='modal-mask';
+  mask.innerHTML=`<div class="modal">
+    <header><b>匯出預覽 ｜ ${filename}</b><button class="icon-btn" id="exClose">✕</button></header>
+    <div class="body" id="exBody"></div>
+    <div class="exmsg">預覽環境會禁止下載檔案。請按「複製」後在 Word 貼上；或用電腦瀏覽器開啟 index.html 即可直接下載 .doc。</div>
+    <div class="foot">
+      <a class="btn" id="exDown" href="${url}" download="${filename}">下載 .doc</a>
+      <button class="btn ghost" id="exCopy">複製（貼到 Word）</button>
+      <button class="btn purple" id="exOk">關閉</button>
+    </div></div>`;
+  document.body.appendChild(mask);
+  const ifr=document.createElement('iframe');ifr.srcdoc=html;mask.querySelector('#exBody').appendChild(ifr);
+  mask.querySelector('#exClose').onclick=()=>mask.remove();
+  mask.querySelector('#exOk').onclick=()=>mask.remove();
+  mask.querySelector('#exCopy').onclick=()=>{
+    const text=html.replace(/<br>/g,'\n').replace(/<\/li>/g,'\n').replace(/<li>/g,'').replace(/<[^>]+>/g,'')
+      .replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&#39;/g,"'").replace(/&quot;/g,'"').trim();
+    const ta=document.createElement('textarea');
+    ta.value=text;ta.style.cssText='position:fixed;left:24px;top:24px;right:24px;bottom:24px;width:auto;height:auto;z-index:10000;font-size:14px;padding:12px;line-height:1.6';
+    document.body.appendChild(ta);ta.focus();ta.select();
+    let ok=false;try{ok=document.execCommand('copy');}catch(e){}
+    if(ok){alert('已複製，可直接貼到 Word');ta.remove();}
+    else{alert('請手動選取文字框內容，按 Ctrl+C 複製');}
+  };
+  mask.onclick=(e)=>{if(e.target===mask)mask.remove();};
+}
+
+/* ============ 模組三：會議管理 ============ */
+let meetings=[];
+let calY=now.getFullYear(),calM=now.getMonth();
+const WD=['日','一','二','三','四','五','六'];
+
+function renderCal(){
+  document.getElementById('calMonth').textContent=`${calY} 年 ${calM+1} 月`;
+  const grid=document.getElementById('calGrid');
+  grid.innerHTML=WD.map(w=>`<div class="wd">${w}</div>`).join('');
+  const first=new Date(calY,calM,1).getDay();
+  const days=new Date(calY,calM+1,0).getDate();
+  const cnt={};
+  meetings.forEach(m=>{const k=m.time.slice(0,10);cnt[k]=(cnt[k]||0)+1;});
+  for(let i=0;i<first;i++){
+    grid.innerHTML+=`<div class="cal-cell muted"></div>`;
+  }
+  for(let d=1;d<=days;d++){
+    const ds=`${calY}-${pad(calM+1)}-${pad(d)}`;
+    const isToday=(calY===now.getFullYear()&&calM===now.getMonth()&&d===now.getDate());
+    const has=cnt[ds]?`<span class="cnt">${cnt[ds]}</span>`:'';
+    grid.innerHTML+=`<div class="cal-cell ${isToday?'today':''} ${cnt[ds]?'has':''}" data-d="${ds}">${d}${has}</div>`;
+  }
+  grid.querySelectorAll('.cal-cell[data-d]').forEach(c=>{
+    c.onclick=()=>{
+      const t=c.dataset.d+'T09:00';
+      document.getElementById('mTime').value=t;
+      document.getElementById('mTopic').focus();
+    };
+  });
+  renderMeetList();
+}
+function fmtTime(s){
+  if(!s)return '—';
+  const [d,t]=s.split('T');
+  return `${d.replace(/-/g,'/')} ${t||''}`;
+}
+function renderMeetList(){
+  const box=document.getElementById('meetList');
+  const arr=[...meetings].sort((a,b)=>a.time<b.time?-1:1);
+  if(!arr.length){box.innerHTML='<div class="empty">尚無會議紀錄</div>';return;}
+  box.innerHTML='<div style="font-size:13px;color:var(--muted);margin-bottom:6px">會議紀錄（依時間排序）</div>'+
+    arr.map(m=>`<div class="meet-item" data-id="${m.id}">
+      <div><div class="mt">${esc(m.topic||'未命名會議')}</div>
+      <div class="mm">${fmtTime(m.time)} ｜ ${esc(m.name||'—')} ｜ ${esc(m.place||'—')}${m.note?'<br>備註：'+esc(m.note):''}</div></div>
+      <button class="icon-btn" data-act="del">刪除</button></div>`).join('');
+  box.querySelectorAll('.meet-item').forEach(it=>{
+    it.querySelector('[data-act=del]').onclick=()=>{
+      if(confirm('確定刪除此會議紀錄？')){meetings=meetings.filter(x=>x.id!==it.dataset.id);save(LS.meetings,meetings);renderCal();}
+    };
+  });
+}
+function addMeeting(){
+  const name=document.getElementById('mName').value.trim();
+  const time=document.getElementById('mTime').value;
+  const topic=document.getElementById('mTopic').value.trim();
+  if(!time||!topic){alert('請填寫「時間」與「會議主題」');return;}
+  meetings.push({id:uid(),name,time,topic,
+    place:document.getElementById('mPlace').value.trim(),
+    note:document.getElementById('mNote').value.trim()});
+  save(LS.meetings,meetings);
+  document.getElementById('mTopic').value='';
+  document.getElementById('mPlace').value='';
+  document.getElementById('mNote').value='';
+  renderCal();
+}
+function clearMeetForm(){
+  ['mName','mTime','mTopic','mPlace','mNote'].forEach(id=>document.getElementById(id).value='');
+}
+
+/* 綁定會議事件 */
+document.getElementById('mAdd').onclick=addMeeting;
+document.getElementById('mClear').onclick=clearMeetForm;
+document.getElementById('prevM').onclick=()=>{calM--;if(calM<0){calM=11;calY--;}renderCal();};
+document.getElementById('nextM').onclick=()=>{calM++;if(calM>11){calM=0;calY++;}renderCal();};
+document.getElementById('todayM').onclick=()=>{calY=now.getFullYear();calM=now.getMonth();renderCal();};
+document.getElementById('exportWord').onclick=exportWord;
+document.getElementById('openWc').onclick=showWechatModal;
+
+/* 微信貼文自動解析 → 帶入會議表單 */
+function parseWechat(raw){
+  const text=raw||'';
+  const lineVal=re=>{const m=text.match(re);return m?m[1].trim():'';};
+  const res={name:'',time:'',topic:'',place:'',note:''};
+  res.topic=lineVal(/(?:會議主題|會議名稱|主題|議題|會議[:：])[:：]?\s*([^\n]+)/);
+  res.place=lineVal(/(?:地點|地点)[:：]?\s*([^\n]+)/);
+  res.name=lineVal(/(?:姓名|名字|主持人|聯絡人|報名|登錄人)[:：]?\s*([^\n]+)/);
+  res.note=lineVal(/(?:備註|备注|說明)[:：]?\s*([^\n]+)/);
+  const p2=n=>String(n).padStart(2,'0');
+  let y=new Date().getFullYear(),mo=new Date().getMonth()+1,da=new Date().getDate(),hh=9,mi=0;
+  let dateEnd=0;
+  const dm=text.match(/(\d{4})[/\-.](\d{1,2})[/\-.](\d{1,2})/);
+  if(dm){y=+dm[1];mo=+dm[2];da=+dm[3];dateEnd=dm.index+dm[0].length;}
+  else{const md=text.match(/(\d{1,2})月(\d{1,2})日/);if(md){mo=+md[1];da=+md[2];dateEnd=md.index+md[0].length;}
+    else{const md2=text.match(/(\d{1,2})[/\-.](\d{1,2})/);if(md2){mo=+md2[1];da=+md2[2];dateEnd=md2.index+md2[0].length;}}}
+  const rest=text.slice(dateEnd);
+  const tms=rest.matchAll(/(\d{1,2})[:：.](\d{2})/g);
+  let found=false;
+  for(const tm of tms){const h=+tm[1],m=+tm[2];if(h<=23&&m<=59){hh=h;mi=m;found=true;break;}}
+  if(!found){const tp=rest.match(/(\d{1,2})\s*點/);if(tp){hh=+tp[1];if((text.includes('下午')||text.includes('晚上')||text.includes('傍晚'))&&hh<12)hh+=12;mi=0;}}
+  if(mo<1||mo>12)mo=new Date().getMonth()+1;
+  if(da<1||da>31)da=new Date().getDate();
+  if(hh<0||hh>23)hh=9;
+  if(mi<0||mi>59)mi=0;
+  res.time=`${y}-${p2(mo)}-${p2(da)}T${p2(hh)}:${p2(mi)}`;
+  if(!res.topic){const f=text.split('\n').map(s=>s.trim()).filter(Boolean)[0]||'';res.topic=f;}
+  return res;
+}
+function showWechatModal(){
+  const mask=document.createElement('div');mask.className='modal-mask';
+  mask.innerHTML=`<div class="modal">
+    <header><b>從微信貼文匯入會議</b><button class="icon-btn" id="wcClose">✕</button></header>
+    <div class="body"><div style="padding:16px">
+      <label>貼上微信會議通知文字</label>
+      <textarea id="wcText" rows="9" placeholder="例：會議主題：總務處週報會議&#10;時間：2026/10/31 09:00&#10;地點：行政會議室&#10;姓名：小曾"></textarea>
+    </div></div>
+    <div class="foot">
+      <button class="btn" id="wcParse">解析並帶入</button>
+      <button class="btn ghost" id="wcCancel">取消</button>
+    </div></div>`;
+  document.body.appendChild(mask);
+  const close=()=>mask.remove();
+  mask.querySelector('#wcClose').onclick=close;
+  mask.querySelector('#wcCancel').onclick=close;
+  mask.querySelector('#wcParse').onclick=()=>{
+    const r=parseWechat(document.getElementById('wcText').value);
+    document.getElementById('mName').value=r.name;
+    document.getElementById('mTime').value=r.time;
+    document.getElementById('mTopic').value=r.topic;
+    document.getElementById('mPlace').value=r.place;
+    document.getElementById('mNote').value=r.note;
+    close();
+    document.getElementById('mTopic').focus();
+  };
+  mask.onclick=(e)=>{if(e.target===mask)mask.remove();};
+}
+
+/* 初始化（雲端優先，失敗退回本機） */
+async function boot(){
+  try{const t=await cloudGet(LS.tasks);tasks=Array.isArray(t)?t:load(LS.tasks);}catch(e){tasks=load(LS.tasks);}
+  try{let r=await cloudGet(LS.reports);if(!r)r=load(LS.reports);
+    if(Array.isArray(r)){r=r.find(x=>x&&x.group==='事務組')||{done:[],upcoming:[]};}
+    if(!r||!Array.isArray(r.done)||!Array.isArray(r.upcoming))r={done:[],upcoming:[]};
+    rep=r;}catch(e){rep={done:[],upcoming:[]};}
+  try{const m=await cloudGet(LS.meetings);meetings=Array.isArray(m)?m:load(LS.meetings);}catch(e){meetings=load(LS.meetings);}
+  renderAcc();renderReport();renderCal();
+}
+boot();
+</script>
+</body>
+</html>
