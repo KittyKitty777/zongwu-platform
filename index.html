@@ -83,6 +83,8 @@
   .btn:hover{filter:brightness(1.05)}
   .btn.ghost{background:var(--orange-soft);color:var(--orange)}
   .btn.sm{padding:5px 11px;font-size:12.5px;border-radius:7px}
+  .sync-box{display:flex;flex-direction:column;align-items:flex-end;gap:2px;margin-right:6px}
+  .sync-stat{font-size:11px;color:var(--muted)}
   .btn.purple{background:var(--purple);color:var(--purple-deep)}
   input[type=text],input[type=date],input[type=datetime-local],textarea,select{
     width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;
@@ -196,6 +198,10 @@
         <div class="date" id="todayStr"></div>
       </div>
       <div class="welcome">
+        <div class="sync-box">
+          <button class="btn sm" id="syncBtn">⟳ 同步資料</button>
+          <span class="sync-stat" id="syncStat">同步中…</span>
+        </div>
         <span id="welcomeText">事務小曾 早安</span>
         <img src="bear1.jpg" alt="吉祥物">
       </div>
@@ -675,16 +681,37 @@ function showWechatModal(){
   mask.onclick=(e)=>{if(e.target===mask)mask.remove();};
 }
 
-/* 初始化（雲端優先，失敗退回本機） */
-async function boot(){
-  try{const t=await cloudGet(LS.tasks);tasks=Array.isArray(t)?t:load(LS.tasks);}catch(e){tasks=load(LS.tasks);}
-  try{let r=await cloudGet(LS.reports);if(!r)r=load(LS.reports);
-    if(Array.isArray(r)){r=r.find(x=>x&&x.group==='事務組')||{done:[],upcoming:[]};}
-    if(!r||!Array.isArray(r.done)||!Array.isArray(r.upcoming))r={done:[],upcoming:[]};
-    rep=r;}catch(e){rep={done:[],upcoming:[]};}
-  try{const m=await cloudGet(LS.meetings);meetings=Array.isArray(m)?m:load(LS.meetings);}catch(e){meetings=load(LS.meetings);}
+/* 同步：雲端優先拉取，失敗退回本機；供首次啟動與定時刷新共用 */
+function fmtClock(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;}
+function setSyncStat(t){const el=document.getElementById('syncStat');if(el)el.textContent=t;}
+async function refreshAll(){
+  if(cloudOn&&_sb){
+    try{
+      const [t,r,m]=await Promise.all([cloudGet(LS.tasks),cloudGet(LS.reports),cloudGet(LS.meetings)]);
+      tasks=Array.isArray(t)?t:load(LS.tasks);
+      if(r&&Array.isArray(r)){r=r.find(x=>x&&x.group==='事務組')||{done:[],upcoming:[]};}
+      if(!r||!Array.isArray(r.done)||!Array.isArray(r.upcoming))r={done:[],upcoming:[]};
+      rep=r;
+      meetings=Array.isArray(m)?m:load(LS.meetings);
+      setSyncStat('已同步 '+fmtClock());
+    }catch(e){
+      tasks=load(LS.tasks);meetings=load(LS.meetings);
+      try{let rr=load(LS.reports);if(Array.isArray(rr)){rr=rr.find(x=>x&&x.group==='事務組')||{done:[],upcoming:[]};}if(!rr||!Array.isArray(rr.done)||!Array.isArray(rr.upcoming))rr={done:[],upcoming:[]};rep=rr;}catch(e2){rep={done:[],upcoming:[]};}
+      setSyncStat('雲端讀取失敗，已用本機');
+    }
+  }else{
+    tasks=load(LS.tasks);meetings=load(LS.meetings);
+    try{let rr=load(LS.reports);if(Array.isArray(rr)){rr=rr.find(x=>x&&x.group==='事務組')||{done:[],upcoming:[]};}if(!rr||!Array.isArray(rr.done)||!Array.isArray(rr.upcoming))rr={done:[],upcoming:[]};rep=rr;}catch(e){rep={done:[],upcoming:[]};}
+    setSyncStat('本機模式（未連雲端）');
+  }
   renderAcc();renderReport();renderCal();
 }
+async function boot(){
+  setSyncStat('同步中…');
+  await refreshAll();
+  if(cloudOn&&_sb){ setInterval(refreshAll,20000); }   /* 每 20 秒自動從雲端拉取，實現準即時同步 */
+}
+document.getElementById('syncBtn').onclick=()=>{ setSyncStat('同步中…'); refreshAll(); };
 boot();
 </script>
 </body>
