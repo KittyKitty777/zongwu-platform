@@ -686,19 +686,14 @@ function fmtClock(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `${
 function setSyncStat(t){const el=document.getElementById('syncStat');if(el)el.textContent=t;}
 async function refreshAll(){
   if(cloudOn&&_sb){
-    try{
-      const [t,r,m]=await Promise.all([cloudGet(LS.tasks),cloudGet(LS.reports),cloudGet(LS.meetings)]);
-      tasks=Array.isArray(t)?t:load(LS.tasks);
+    let ok=true;
+    try{const t=await cloudGet(LS.tasks);tasks=Array.isArray(t)?t:load(LS.tasks);}catch(e){tasks=load(LS.tasks);ok=false;}
+    try{let r=await cloudGet(LS.reports);
       if(r&&Array.isArray(r)){r=r.find(x=>x&&x.group==='事務組')||{done:[],upcoming:[]};}
       if(!r||!Array.isArray(r.done)||!Array.isArray(r.upcoming))r={done:[],upcoming:[]};
-      rep=r;
-      meetings=Array.isArray(m)?m:load(LS.meetings);
-      setSyncStat('已同步 '+fmtClock());
-    }catch(e){
-      tasks=load(LS.tasks);meetings=load(LS.meetings);
-      try{let rr=load(LS.reports);if(Array.isArray(rr)){rr=rr.find(x=>x&&x.group==='事務組')||{done:[],upcoming:[]};}if(!rr||!Array.isArray(rr.done)||!Array.isArray(rr.upcoming))rr={done:[],upcoming:[]};rep=rr;}catch(e2){rep={done:[],upcoming:[]};}
-      setSyncStat('雲端讀取失敗，已用本機');
-    }
+      rep=r;}catch(e){try{let rr=load(LS.reports);if(Array.isArray(rr)){rr=rr.find(x=>x&&x.group==='事務組')||{done:[],upcoming:[]};}if(!rr||!Array.isArray(rr.done)||!Array.isArray(rr.upcoming))rr={done:[],upcoming:[]};rep=rr;}catch(e2){rep={done:[],upcoming:[]};}ok=false;}
+    try{const m=await cloudGet(LS.meetings);meetings=Array.isArray(m)?m:load(LS.meetings);}catch(e){meetings=load(LS.meetings);ok=false;}
+    setSyncStat(ok?'已同步 '+fmtClock():'雲端讀取失敗，已用本機');
   }else{
     tasks=load(LS.tasks);meetings=load(LS.meetings);
     try{let rr=load(LS.reports);if(Array.isArray(rr)){rr=rr.find(x=>x&&x.group==='事務組')||{done:[],upcoming:[]};}if(!rr||!Array.isArray(rr.done)||!Array.isArray(rr.upcoming))rr={done:[],upcoming:[]};rep=rr;}catch(e){rep={done:[],upcoming:[]};}
