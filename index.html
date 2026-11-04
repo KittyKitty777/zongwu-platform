@@ -684,6 +684,13 @@ function showWechatModal(){
 /* 同步：雲端優先拉取，失敗退回本機；供首次啟動與定時刷新共用 */
 function fmtClock(){const d=new Date(),p=n=>String(n).padStart(2,'0');return `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;}
 function setSyncStat(t){const el=document.getElementById('syncStat');if(el)el.textContent=t;}
+/* 是否正在輸入/編輯：自動同步時避免在這些狀態下重畫 DOM，否則會打斷打字（焦點流失） */
+function isUserEditing(){
+  const a=document.activeElement;
+  if(a&&(a.tagName==='INPUT'||a.tagName==='TEXTAREA'||a.tagName==='SELECT'))return true;
+  if(typeof repEditing!=='undefined'&&repEditing)return true;
+  return false;
+}
 async function refreshAll(){
   if(cloudOn&&_sb){
     let ok=true;
@@ -699,7 +706,8 @@ async function refreshAll(){
     try{let rr=load(LS.reports);if(Array.isArray(rr)){rr=rr.find(x=>x&&x.group==='事務組')||{done:[],upcoming:[]};}if(!rr||!Array.isArray(rr.done)||!Array.isArray(rr.upcoming))rr={done:[],upcoming:[]};rep=rr;}catch(e){rep={done:[],upcoming:[]};}
     setSyncStat('本機模式（未連雲端）');
   }
-  renderAcc();renderReport();renderCal();
+  /* 正在編輯/輸入時不重畫，避免打斷打字；資料已更新到記憶體，停止編輯後下次刷新即反映 */
+  if(!isUserEditing()){ renderAcc();renderReport();renderCal(); }
 }
 async function boot(){
   setSyncStat('同步中…');
